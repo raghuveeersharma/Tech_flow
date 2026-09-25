@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #020617; /* slate-950 */
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ---------- React Flow theme tweaks ---------- */
+.react-flow {
+  --xy-background-color: #020617;
+  --xy-minimap-background-color: rgba(15, 23, 42, 0.85);
+  --xy-controls-button-background-color: rgba(15, 23, 42, 0.9);
+  --xy-controls-button-background-color-hover: rgba(30, 41, 59, 1);
+  --xy-controls-button-color: #cbd5e1;
+  --xy-controls-button-color-hover: #fff;
+  --xy-controls-button-border-color: rgba(255, 255, 255, 0.08);
+  --xy-controls-box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(56, 189, 248, 0.07), transparent 55%),
+    radial-gradient(ellipse at 90% 100%, rgba(167, 139, 250, 0.08), transparent 55%), #020617;
+}
+.react-flow__minimap {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.react-flow__controls {
+  border-radius: 10px;
+  overflow: hidden;
+}
+.react-flow__attribution {
+  background: rgba(2, 6, 23, 0.6) !important;
+  color: #64748b !important;
+}
+.react-flow__attribution a {
+  color: #94a3b8 !important;
+}
+.react-flow__node {
+  /* the card below handles its own focus ring */
+  outline: none;
+}
+
+/* ---------- Node card (glassmorphism) ---------- */
+.node-card {
+  /* React Flow disables pointer events on non-selectable nodes; the card handles its own clicks */
+  pointer-events: auto;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.82), rgba(15, 23, 42, 0.9));
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid color-mix(in srgb, var(--c) 38%, transparent);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: opacity 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.node-card:hover {
+  border-color: var(--c);
+  animation: node-pulse 1.6s ease-in-out infinite;
+}
+.node-card:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+/* selected: glowing ring in the category color */
+.node-card[aria-pressed="true"] {
+  border-color: var(--c);
+  box-shadow: 0 0 0 2px var(--c), 0 0 30px 4px var(--c-glow), 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.node-float {
+  animation: node-float 3s ease-in-out infinite;
+}
+
+@keyframes node-float {
+  0%,
+  100% {
+    transform: translateY(-3px);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+@keyframes node-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    filter: drop-shadow(0 0 10px var(--c-glow));
+  }
+}
+
+/* ---------- Edge labels ---------- */
+.edge-label {
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: #94a3b8;
+  background: rgba(2, 6, 23, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+  transition: opacity 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ---------- Reduced motion: no float, no pulse, no travelling particles ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .node-float,
+  .node-card:hover {
+    animation: none;
+  }
+  .node-card,
+  .edge-label {
+    transition: none;
+  }
+}
+
+/* ---------- Domain picker ---------- */
+.picker-bg {
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba(56, 189, 248, 0.12), transparent 50%),
+    radial-gradient(ellipse at 85% 10%, rgba(167, 139, 250, 0.12), transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(52, 211, 153, 0.07), transparent 55%), #020617;
+}
+.domain-card {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.85));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.domain-card:hover,
+.domain-card:focus-visible {
+  border-color: var(--c);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45), 0 0 34px -6px var(--c-glow);
+}
+.preview-spark {
+  left: 0.5rem;
+  animation: preview-travel 3.2s linear infinite;
+}
+@keyframes preview-travel {
+  0% {
+    left: 0.5rem;
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
+  100% {
+    left: calc(100% - 0.75rem);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .preview-spark {
+    display: none;
+  }
+  .domain-card {
+    transition: none;
+  }
+}
