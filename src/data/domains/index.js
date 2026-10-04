@@ -3,7 +3,8 @@
 import dataEngineering from "./data-engineering";
 import dataAnalytics from "./data-analytics";
 import dataScience from "./data-science";
+import aiMl from "./ai-ml";
 
-export const domains = [dataEngineering, dataAnalytics, dataScience];
+export const domains = [dataEngineering, dataAnalytics, dataScience, aiMl];
 
 export const getDomain = (id) => domains.find((d) => d.id === id) ?? null;
