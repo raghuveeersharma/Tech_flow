@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, Info, Lightbulb, ListOrdered, Wrench, X } from "lucide-react";
+import { AlertTriangle, Info, Lightbulb, ListOrdered, Split, Wrench, X } from "lucide-react";
 import SampleDataView from "./SampleDataView";
 import { getIcon } from "../data/icons";
-import { ui } from "../data/ui";
-import { PANEL_WIDTH, SHEET_RATIO } from "../data/layout";
+import { fill, ui } from "../data/ui";
+import { PANEL_WIDTH } from "../data/layout";
 
-const text = ui.panel;
+const text = { ...ui.panel, subSteps: ui.subSteps };
 
 function Section({ icon: Icon, title, color, children }) {
   return (
@@ -44,10 +44,13 @@ function Overview({ node, color }) {
         </ol>
       </Section>
 
-      <Section icon={Lightbulb} title={text.sections.why} color={color}>
-        <p className="text-sm leading-relaxed text-slate-300">{details.whyImportant}</p>
-      </Section>
+      {details.whyImportant && (
+        <Section icon={Lightbulb} title={text.sections.why} color={color}>
+          <p className="text-sm leading-relaxed text-slate-300">{details.whyImportant}</p>
+        </Section>
+      )}
 
+      {details.tools?.length > 0 && (
       <Section icon={Wrench} title={text.sections.tools} color={color}>
         <ul className="grid gap-2">
           {details.tools.map((tool) => (
@@ -66,7 +69,9 @@ function Overview({ node, color }) {
           ))}
         </ul>
       </Section>
+      )}
 
+      {details.commonProblems?.length > 0 && (
       <Section icon={AlertTriangle} title={text.sections.problems} color={color}>
         <ul className="space-y-1.5">
           {details.commonProblems.map((problem) => (
@@ -77,16 +82,44 @@ function Overview({ node, color }) {
           ))}
         </ul>
       </Section>
+      )}
     </div>
   );
 }
 
-export default function DetailPanel({ domain, node, tab, onTabChange, onClose, isMobile }) {
+function SubStepsAction({ count, color, onExpand }) {
+  const has = count > 0;
+  return (
+    <div className="shrink-0 px-5 pb-3">
+      <button
+        type="button"
+        disabled={!has}
+        onClick={onExpand}
+        aria-describedby="substeps-note"
+        className="flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-sky-400 enabled:hover:brightness-125 disabled:cursor-not-allowed disabled:opacity-50"
+        style={{
+          borderColor: has ? `${color}66` : "rgba(255,255,255,0.1)",
+          background: has ? `${color}1f` : "rgba(255,255,255,0.03)",
+          color: has ? color : "#94a3b8",
+        }}
+      >
+        <Split className="h-4 w-4" aria-hidden="true" />
+        {has ? fill(text.subSteps.button, { count }) : ui.subSteps.disabledButton}
+      </button>
+      <p id="substeps-note" className="mt-1.5 flex items-center gap-1.5 text-[11px] text-slate-500">
+        {!has && <Info className="h-3 w-3 shrink-0" aria-hidden="true" />}
+        {has ? ui.subSteps.hint : ui.subSteps.none}
+      </p>
+    </div>
+  );
+}
+
+export default function DetailPanel({ domain, node, tab, onTabChange, onClose, onExpand, subCount = 0, isMobile }) {
   const panelRef = useRef(null);
   const category = domain.categories[node.category];
   const color = category.color;
   const Icon = getIcon(node.icon);
-  const sample = node.sampleKey ? domain.sampleData[node.sampleKey] : null;
+  const sample = !node.isSub && node.sampleKey ? domain.sampleData[node.sampleKey] : null;
   const activeTab = sample ? tab : "info";
   const titleId = `panel-title-${node.id}`;
 
@@ -108,8 +141,8 @@ export default function DetailPanel({ domain, node, tab, onTabChange, onClose, i
       aria-modal="false"
       aria-labelledby={titleId}
       tabIndex={-1}
-      className="absolute z-20 flex flex-col overflow-hidden border-white/10 bg-slate-900/90 shadow-2xl shadow-black/50 outline-none backdrop-blur-xl max-md:inset-x-0 max-md:bottom-0 max-md:rounded-t-2xl max-md:border-t md:bottom-0 md:right-0 md:top-0 md:border-l"
-      style={isMobile ? { height: `${SHEET_RATIO * 100}%` } : { width: PANEL_WIDTH, maxWidth: "100%" }}
+      className="absolute z-20 flex flex-col overflow-hidden border-white/10 bg-slate-900/90 shadow-2xl shadow-black/50 outline-none backdrop-blur-xl max-md:inset-0 md:bottom-0 md:right-0 md:top-0 md:border-l"
+      style={isMobile ? undefined : { width: PANEL_WIDTH, maxWidth: "100%" }}
       initial={isMobile ? { y: "100%" } : { x: "100%" }}
       animate={{ x: 0, y: 0 }}
       exit={isMobile ? { y: "100%" } : { x: "100%" }}
@@ -133,8 +166,9 @@ export default function DetailPanel({ domain, node, tab, onTabChange, onClose, i
             className="mt-1 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
             style={{ background: `${color}22`, color }}
           >
-            {category.label}
+            {node.isSub ? node.stepLabel : category.label}
           </span>
+          {node.isSub && <p className="mt-1 text-[11px] text-slate-500">{fill(ui.subSteps.partOf, { parent: node.parentLabel })}</p>}
         </div>
         <button
           type="button"
@@ -147,6 +181,8 @@ export default function DetailPanel({ domain, node, tab, onTabChange, onClose, i
       </header>
 
       <p className="shrink-0 px-5 pb-3 text-sm text-slate-400">{node.details.summary}</p>
+
+      {!node.isSub && <SubStepsAction count={subCount} color={color} onExpand={onExpand} />}
 
       {tabs.length > 0 && (
         <div role="tablist" aria-label={text.tablistLabel} className="flex shrink-0 gap-1 border-b border-white/10 px-4">
