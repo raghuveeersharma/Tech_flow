@@ -46,6 +46,17 @@ export const ui = {
       problems: "Common problems",
     },
   },
+  subSteps: {
+    button: "See sub-steps ({count})",
+    disabledButton: "See sub-steps",
+    none: "No sub-nodes or steps for this stage.",
+    hint: "Splits this stage into its smaller steps on the canvas.",
+    stepOf: "Step {current} of {total}",
+    partOf: "Part of {parent}",
+    back: "Back to full flow",
+    backLabel: "Back to the full flow",
+    viewing: "Sub-steps of {parent}",
+  },
   sampleView: {
     input: "Input",
     output: "Output",
