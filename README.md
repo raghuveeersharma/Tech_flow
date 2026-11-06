@@ -19,6 +19,8 @@ No backend, no API calls, no database. All content lives in local data files.
 
 **Stack:** Vite · React 18 · @xyflow/react (React Flow) · framer-motion · Tailwind CSS 3 · lucide-react
 
+Full developer documentation (architecture, data model, behavior, how to add a domain) is in [`docs/`](docs/README.md).
+
 ## Quick start
 
 ```bash
@@ -38,6 +40,7 @@ Requires Node 18+.
 | Pick a domain card on the first screen | Opens that domain (link: `#/data-science`, etc.). **All domains** or the browser Back button returns to the list. |
 | **Basic / Medium / Advanced** buttons | Cumulative levels (6 → 12 → 20 nodes). New nodes spring in (80 ms stagger), new edges draw in, existing nodes slide to their new positions, the view re-fits in 600 ms. |
 | Click a node (or Tab to it and press Enter) | Glowing ring in the category color, other nodes dim to 60 %, connected edges light up, detail panel opens. |
+| **See sub-steps** button in the panel | Splits that node into its smaller steps on the canvas (a chain you can click like any node). The button is disabled, with a "No sub-nodes or steps" note, when a node has none. **Back to full flow** (or Esc) merges them back. |
 | **Overview / Example data** tabs | Explanation + tools + common problems, or a before/after JSON diff of the order at that stage. |
 | Click the canvas, the ✕ button, or press **Esc** | Closes the panel. |
 | **Play data flow** | A packet travels the main path and each stage's example data opens for ~2 s. |
@@ -45,7 +48,7 @@ Requires Node 18+.
 Diff colors in *Example data*: **green** = added, **yellow** = modified, **red strikethrough** = removed.
 
 On screens narrower than 768 px the canvas goes full width, nodes show icon + short label, the detail panel
-becomes a bottom sheet (60 % height) and the level buttons stay at the bottom.
+becomes a full-screen view (close it with the ✕ button or Esc) and the level buttons stay at the bottom.
 `prefers-reduced-motion` disables the idle float, hover pulse and travelling particles.
 
 ## Project structure
@@ -61,6 +64,7 @@ src/
       <domain-id>/           one folder per domain
         index.js             name, tagline, example, title, level descriptions
         categories.js        color + icon + label per category
+        subNodes.js          optional sub-steps per node (the "See sub-steps" button)
         nodes.js             node definitions, details and the "play" paths
         edges.js             edges (with level / removedAt)
         sampleData.js        the running example and its before/after state per node
@@ -74,12 +78,13 @@ src/
     FlowCanvas.jsx           React Flow wrapper, level transitions, fit-view
     PipelineNode.jsx         custom node (glass card, float, glow, a11y)
     AnimatedEdge.jsx         custom edge with constant-speed glowing particles
-    DetailPanel.jsx          side panel / bottom sheet (role="dialog")
+    DetailPanel.jsx          side panel / full-screen on phones (role="dialog")
     SampleDataView.jsx       before/after JSON viewer with diff highlighting
     LevelSwitcher.jsx        Basic / Medium / Advanced + Play button
     Legend.jsx               category legend (top-left)
   hooks/
     useVisibleGraph.js       filters a domain's nodes/edges by level, resolves positions, mobile layout
+    useSubGraph.js           builds the chain of sub-step nodes when a node is split
     useMediaQuery.js
 scripts/
   validate-data.mjs          npm run validate [-- <domain-id>]
@@ -97,6 +102,7 @@ Everything you see is data:
   is its layout position (use `g(col,row)`), and `positionByLevel` can override it for later levels (nodes slide
   there when the level changes). Add a matching `sampleKey` entry in `sampleData.js`; omit `sampleKey` and the
   *Example data* tab is hidden automatically.
+- **Add sub-steps to a node** in the domain's `subNodes.js`: `{ [nodeId]: [{ id, label, shortLabel, icon, summary, whatHappens, howItHappens[], tools?, commonProblems? }] }`. Nodes without an entry get a disabled "See sub-steps" button.
 - **Add an edge** in `edges.js`. Use `removedAt` to retire an edge when a richer path replaces it.
   Handle sides are chosen automatically from the relative node positions.
 - **Change colors / icons** in the domain's `categories.js` (hex colors; icon names must exist in `icons.js`).

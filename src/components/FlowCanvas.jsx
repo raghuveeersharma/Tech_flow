@@ -13,7 +13,7 @@ import { animate, useReducedMotion } from "framer-motion";
 import PipelineNode from "./PipelineNode";
 import AnimatedEdge from "./AnimatedEdge";
 import { ui } from "../data/ui";
-import { PANEL_WIDTH, SHEET_RATIO } from "../data/layout";
+import { PANEL_WIDTH } from "../data/layout";
 
 const nodeTypes = { pipeline: PipelineNode };
 const edgeTypes = { animated: AnimatedEdge };
@@ -171,9 +171,10 @@ function FlowCanvasInner({ graph, isMobile, selectedId, onSelect, onClose, packe
   useEffect(() => {
     const timer = setTimeout(() => {
       const rect = wrapperRef.current?.getBoundingClientRect();
+      // On phones the panel is full screen, so the canvas is not resized for it.
       const open = panelOpenRef.current && rect;
       const right = open && !isMobile ? PANEL_WIDTH : 0;
-      const bottom = open && isMobile ? Math.round(rect.height * SHEET_RATIO) : 0;
+      const bottom = 0;
       const edge = isMobile ? 16 : 48;
       // Room under the graph for the zoom controls (phones) or the minimap (desktop) so they never cover a node.
       const controlsRoom = isMobile ? 36 : 64;
@@ -193,14 +194,14 @@ function FlowCanvasInner({ graph, isMobile, selectedId, onSelect, onClose, packe
 
   // ---- when a node is selected, make sure it isn't hidden behind the panel ----
   useEffect(() => {
-    if (!selectedId || !wrapperRef.current) return;
+    if (!selectedId || !wrapperRef.current || isMobile) return;
     const node = graph.nodes.find((n) => n.id === selectedId);
     if (!node) return;
     const timer = setTimeout(() => {
       const rect = wrapperRef.current.getBoundingClientRect();
       const { x, y, zoom } = rf.getViewport();
-      const visibleW = rect.width - (isMobile ? 0 : PANEL_WIDTH);
-      const visibleH = isMobile ? rect.height * (1 - SHEET_RATIO) : rect.height;
+      const visibleW = rect.width - PANEL_WIDTH;
+      const visibleH = rect.height;
       const margin = 28;
       const sx = node.position.x * zoom + x;
       const sy = node.position.y * zoom + y;
