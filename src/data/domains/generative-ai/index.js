@@ -1,5 +1,6 @@
 import { categories } from "./categories";
 import { nodes, playPaths } from "./nodes";
+import { subNodes } from "./subNodes";
 import { edges } from "./edges";
 import { sampleData, floatFields } from "./sampleData";
 
@@ -23,6 +24,7 @@ export default {
   },
   categories,
   nodes,
+  subNodes,
   edges,
   sampleData,
   floatFields,
