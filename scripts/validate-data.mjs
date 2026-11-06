@@ -106,6 +106,25 @@ for (const d of domains) {
     if (!n.sampleKey || !d.sampleData[n.sampleKey]) E(`${n.id}: sampleKey missing or not in sampleData`);
   }
 
+  // ---------- sub-nodes (optional) ----------
+  for (const [parentId, subs] of Object.entries(d.subNodes ?? {})) {
+    if (!d.nodes.some((n) => n.id === parentId)) { E(`subNodes.${parentId}: no such node`); continue; }
+    if (!Array.isArray(subs) || subs.length < 2 || subs.length > 8) E(`subNodes.${parentId}: needs 2-8 sub-nodes`);
+    const subIds = new Set();
+    for (const sn of subs ?? []) {
+      const at = `subNodes.${parentId}.${sn.id}`;
+      if (!/^[a-z0-9_]+$/.test(sn.id ?? "") || subIds.has(sn.id)) E(`${at}: id must be unique snake_case`);
+      subIds.add(sn.id);
+      if (!str(sn.label, 3)) E(`${at}: label`);
+      if (!str(sn.shortLabel) || sn.shortLabel.length > 12) E(`${at}: shortLabel required, max 12 chars`);
+      if (!iconMap[sn.icon]) E(`${at}: icon "${sn.icon}" not in icons.js`);
+      if (!str(sn.summary, 15)) E(`${at}: summary`);
+      if (!str(sn.whatHappens, 60)) E(`${at}: whatHappens too short (<60 chars)`);
+      if (!Array.isArray(sn.howItHappens) || sn.howItHappens.length < 2 || !sn.howItHappens.every((x) => str(x, 10))) E(`${at}: howItHappens needs >=2 steps`);
+      if (sn.tools && !sn.tools.every((t) => str(t.name) && str(t.type) && str(t.note, 10))) E(`${at}: tools need name/type/note`);
+    }
+  }
+
   // ---------- level counts ----------
   const added = (l) => d.nodes.filter((n) => n.level === l).length;
   const aB = added("basic"), aM = added("medium"), aA = added("advanced");
