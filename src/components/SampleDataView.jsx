@@ -64,12 +64,12 @@ function Block({ title, rows, color, floatFields }) {
             <div
               key={row.key}
               data-status={row.status}
-              className={`flex gap-2 whitespace-nowrap border-l-2 py-px pl-2.5 pr-3 ${style.row}`}
+              className={`flex gap-2 border-l-2 py-px pl-2.5 pr-3 ${style.row}`}
             >
               <span aria-hidden="true" className="w-3 shrink-0 select-none text-center font-bold">
                 {style.mark}
               </span>
-              <span className={style.strike ? "line-through decoration-red-400/80" : ""}>
+              <span className={`min-w-0 [overflow-wrap:anywhere] ${style.strike ? "line-through decoration-red-400/80" : ""}`}>
                 <span className="opacity-80">&quot;{row.key}&quot;</span>
                 <span className="text-slate-500">: </span>
                 <span>{formatValue(row.key, row.value, floatFields)}</span>
